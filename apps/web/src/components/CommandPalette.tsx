@@ -59,6 +59,7 @@ import {
   ChartNoAxesColumnIcon,
   CheckIcon,
   ChevronRightIcon,
+  Columns3Icon,
   CornerLeftUpIcon,
   FileSearchIcon,
   FolderGit2Icon,
@@ -1604,6 +1605,18 @@ function OpenCommandPaletteDialog(props: {
     shortcutCommand: "usage.open",
     run: async () => {
       await navigate({ to: "/usage" });
+    },
+  });
+
+  actionItems.push({
+    kind: "action",
+    value: "action:lanes",
+    searchTerms: ["lanes", "agent view", "side by side", "grid", "parallel", "split", "columns"],
+    title: "Open lanes",
+    icon: <Columns3Icon className={ITEM_ICON_CLASS} />,
+    shortcutCommand: "lanes.open",
+    run: async () => {
+      await navigate({ to: "/lanes" });
     },
   });
 

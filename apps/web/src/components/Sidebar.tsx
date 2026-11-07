@@ -1,4 +1,5 @@
 import { attachSidebarTree } from "../lib/sidebarTree";
+import { addThreadsToLanes, isLane, LANES_PATH } from "../lanesStore";
 import { type EnvironmentId, type ScopedProjectRef } from "@t3tools/contracts";
 import type { EnvironmentServerConfig } from "@t3tools/client-runtime/connection";
 import { ThreadContextDragGhost } from "./chat/ThreadContextDragGhost";
@@ -2357,6 +2358,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                 ]
               : []),
             { id: "mark-unread", label: `Mark unread (${count})` },
+            { id: "add-to-lanes", label: `Add to lanes (${count})` },
             {
               id: "delete",
               label: `Delete (${count})`,
@@ -2381,6 +2383,14 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                   return current && current.settledOverride !== "settled" ? [current] : [];
                 })
               : selectedThreads;
+      if (clicked.value === "add-to-lanes") {
+        addThreadsToLanes(
+          selectedThreads.map((thread) => scopeThreadRef(thread.environmentId, thread.id)),
+        );
+        clearSelection();
+        void router.navigate({ to: LANES_PATH });
+        return;
+      }
       if (clicked.value === "settle" && actionTargets.length === 0) return;
       if (clicked.value !== "mark-unread" && !checkThreadOperations(actionTargets)) return;
       if (clicked.value?.startsWith("snooze:")) {
@@ -2620,6 +2630,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                 threadRef.environmentId,
                 AuthOrchestrationOperateScope,
               ),
+              inLanes: isLane(threadKey),
               branch: thread.branch ?? null,
               // An archived project is not a filter choice.
               projectFilter:
@@ -2668,6 +2679,10 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
           return;
         }
         switch (clicked.value) {
+          case "add-to-lanes":
+            addThreadsToLanes([threadRef]);
+            void router.navigate({ to: LANES_PATH });
+            return;
           case "filter-by-project":
             if (threadProjectGroup) {
               setProjectScopeKeys(
