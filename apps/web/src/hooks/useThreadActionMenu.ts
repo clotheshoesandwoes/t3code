@@ -1,4 +1,5 @@
-import { scopeProjectRef } from "@t3tools/client-runtime/environment";
+import { scopedThreadKey, scopeProjectRef } from "@t3tools/client-runtime/environment";
+import { addThreadsToLanes, isLane, LANES_PATH } from "../lanesStore";
 import { requestCustomSnooze } from "../components/CustomSnoozeDialog";
 import { openGuestShareDialog } from "../components/chat/guestShareDialogState";
 import {
@@ -136,6 +137,7 @@ export function useThreadActionMenu(input: {
       const items = buildThreadActionMenuItems({
         canOperate: readEnvironmentScope(threadRef.environmentId, AuthOrchestrationOperateScope),
         canFind: onFind !== undefined,
+        inLanes: isLane(scopedThreadKey(threadRef)),
         branch: thread.branch ?? null,
         projectFilter: null,
         isPinned: thread.pinnedAt != null,
@@ -192,6 +194,10 @@ export function useThreadActionMenu(input: {
       switch (action) {
         case "find":
           onFind?.(threadRef);
+          return;
+        case "add-to-lanes":
+          addThreadsToLanes([threadRef]);
+          void router.navigate({ to: LANES_PATH });
           return;
         case "project-settings": {
           const project = projects.find(

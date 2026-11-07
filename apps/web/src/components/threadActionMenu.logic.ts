@@ -3,6 +3,7 @@ import type { SnoozePreset } from "@t3tools/client-runtime/state/thread-settled"
 
 export type ThreadActionMenuId =
   | "find"
+  | "add-to-lanes"
   | "new-thread-on-branch"
   | "filter-by-project"
   | "turn-into-project"
@@ -70,6 +71,8 @@ export function buildDraftActionMenuItems(options: {
 export interface ThreadActionMenuState {
   readonly canOperate: boolean;
   readonly canFind?: boolean;
+  /** Already a lane, so the item shows it instead of adding it. */
+  readonly inLanes?: boolean;
   readonly branch: string | null;
   readonly projectFilter: {
     readonly label: string;
@@ -101,6 +104,7 @@ export interface ThreadActionMenuState {
 export function threadActionRequiresOperate(action: ThreadActionMenuId): boolean {
   return ![
     "find",
+    "add-to-lanes",
     "new-thread-on-branch",
     "project-settings",
     "mark-unread",
@@ -120,6 +124,9 @@ export function buildThreadActionMenuItems(
     ...(state.canFind
       ? [{ id: "find" as const, label: "Find in thread", icon: "text-search" }]
       : []),
+    state.inLanes
+      ? { id: "add-to-lanes" as const, label: "Show in lanes", icon: "columns-3" }
+      : { id: "add-to-lanes" as const, label: "Add to lanes", icon: "columns-3" },
     ...(state.branch
       ? [
           {

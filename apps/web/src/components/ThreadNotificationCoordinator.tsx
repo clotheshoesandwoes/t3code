@@ -17,7 +17,9 @@ import {
   ShieldQuestionIcon,
 } from "lucide-react";
 
+import { scopedThreadKey, scopeThreadRef } from "@t3tools/client-runtime/environment";
 import { getClientSettings, subscribeClientSettings } from "../hooks/useSettings";
+import { isVisibleLane } from "../lanesStore";
 import { isWindowsPlatform } from "../lib/utils";
 import { environmentSummaries } from "../state/presentation";
 import { environmentShell } from "../state/shell";
@@ -149,7 +151,11 @@ export function startThreadNotifications(
       inAppNotificationsEnabled &&
       document.visibilityState === "visible" &&
       document.hasFocus() &&
-      (active.environmentId !== environmentId || active.threadId !== thread.id)
+      (active.environmentId !== environmentId || active.threadId !== thread.id) &&
+      !isVisibleLane(
+        router.state.location.pathname,
+        scopedThreadKey(scopeThreadRef(environmentId, thread.id)),
+      )
     ) {
       const toastKey = threadKey({ environmentId, threadId: thread.id });
       const toastId: ToastId = toastManager.add({
